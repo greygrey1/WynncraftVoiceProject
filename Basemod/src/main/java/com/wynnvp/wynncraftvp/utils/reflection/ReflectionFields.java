@@ -2,6 +2,7 @@ package com.wynnvp.wynncraftvp.utils.reflection;
 
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -17,7 +18,7 @@ public enum ReflectionFields {
         this.field = ReflectionHelper.findField(holdingClass, deobf, obf);
     }
 
-    public <T> T getValue(Object parent) {
+    public <T> @Nullable T getValue(Class<Entity> parent) {
         try {
             return (T) field.get(parent);
         } catch (IllegalAccessException e) {

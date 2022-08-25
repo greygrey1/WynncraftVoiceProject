@@ -9,28 +9,29 @@ import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 
 public class SoundController {
 
-    /*public static void main(String[] args) {
-        new SoundController().playAtPlayer(new File("C:/Users/ender/AppData/Roaming/.minecraft/wynnvp/kingsrecruit/kingsrecruit-caravandriver-2.ogg"));
-    }
-
     public void playAtPlayer(File file) {
-        final VorbisAudioFileReader vb = new VorbisAudioFileReader();
-        try (final AudioInputStream in = vb.getAudioInputStream(file)) {
-            final AudioFormat outFormat = getOutFormat(in.getFormat());
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class, outFormat);
-            try (final SourceDataLine line =
-                         (SourceDataLine) AudioSystem.getLine(info)) {
-                if (line != null) {
-                    line.open(outFormat);
-                    line.start();
-                    stream(getAudioInputStream(outFormat, in), line);
-                    line.drain();
-                    line.stop();
+        final Thread musicThread = new Thread(() -> {
+            try (final AudioInputStream in = AudioSystem.getAudioInputStream(file)) {
+                final AudioFormat outFormat = getOutFormat(in.getFormat());
+                DataLine.Info info = new DataLine.Info(SourceDataLine.class, outFormat);
+                try (final SourceDataLine line =
+                             (SourceDataLine) AudioSystem.getLine(info)) {
+                    if (line != null) {
+                        line.open(outFormat);
+                        line.start();
+                        stream(getAudioInputStream(outFormat, in), line);
+                        line.drain();
+                        line.stop();
+                    }
+                } catch (LineUnavailableException e) {
+                    e.printStackTrace();
                 }
+            } catch (UnsupportedAudioFileException | IOException e) {
+                e.printStackTrace();
             }
-        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException e) {
-            e.printStackTrace();
-        }
+        });
+        musicThread.setName("VoW - Sound Player");
+        musicThread.start();
     }
 
     private AudioFormat getOutFormat(AudioFormat inFormat) {
@@ -45,6 +46,6 @@ public class SoundController {
         for (int n = 0; n != -1; n = in.read(buffer, 0, buffer.length)) {
             line.write(buffer, 0, n);
         }
-    }*/
+    }
 
 }

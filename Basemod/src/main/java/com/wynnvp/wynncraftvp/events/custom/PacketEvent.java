@@ -34,10 +34,6 @@ public class PacketEvent<T extends Packet<?>> extends GenericEvent<T> {
         return handler;
     }
 
-    public ChannelHandlerContext getCtx() {
-        return ctx;
-    }
-
     @Override
     public boolean isCancelable() {
         return true;
@@ -54,11 +50,6 @@ public class PacketEvent<T extends Packet<?>> extends GenericEvent<T> {
                 ((ChannelInboundHandler) handler).channelRead(ctx, packet);
             } catch (Exception ignored) {
             }
-        }
-
-        public void transform(Packet<?> to) {
-            setCanceled(true);
-            emulateRead(to);
         }
 
         @Override

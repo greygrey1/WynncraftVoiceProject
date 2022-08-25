@@ -66,11 +66,10 @@ public class SoundPlayer {
         }
 
         //System.out.println("Playing sound: " + line);
-        Minecraft.getMinecraft().getSoundHandler().stopSounds();
+        //Minecraft.getMinecraft().getSoundHandler().stopSounds();
         soundsHandler.get(line).ifPresent(sound -> {
             final CustomSoundClass customSoundClass = sound.getCustomSoundClass();
-            final SoundEvent soundEvent = customSoundClass.getSoundEvent();
-
+            final File audioFile = new File(Utils.FILE_ROOT, getQuest(sound.getId())+"/"+sound.getId()+".ogg");
             //Solves ArmorStand problem with ??? as name
             //WARNING: not yet tested
             QuestMarkHandler.put(getQuest(sound.getId()));
@@ -80,12 +79,13 @@ public class SoundPlayer {
             //ModCore.instance.controller.playAtPlayer(new File(Utils.FILE_ROOT, getQuest(sound.getId())+"/"+sound.getId()+".ogg"));
             if (customSoundClass.isMovingSound() || ConfigHandler.playAllSoundsOnPlayer) {
                 //Play the sound at the player
-                Minecraft.getMinecraft().getSoundHandler().playSound(new SoundAtPlayer(soundEvent));
+                ModCore.instance.controller.playAtPlayer(audioFile);
+                //Minecraft.getMinecraft().getSoundHandler().playSound(new SoundAtPlayer(soundEvent));
                 addSoundToCoolDown(line);
                 return;
             }
 
-            String rawName = getRawName(sound.getId());
+            /*String rawName = getRawName(sound.getId());
             if (NPCHandler.getNamesHandlers().containsKey(rawName)) {
                NPCHandler.find(rawName).ifPresent(vector -> {
                    if (Minecraft.getMinecraft().player.getDistance(vector.x, vector.y, vector.z) >= 20) {
@@ -96,7 +96,7 @@ public class SoundPlayer {
                });
             } else {
                 playSoundAtCoords(Minecraft.getMinecraft().player.getPositionVector(), soundEvent);
-            }
+            }*/
             addSoundToCoolDown(line);
         });
     }

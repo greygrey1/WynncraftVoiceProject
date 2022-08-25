@@ -46,7 +46,6 @@ public class ArmorCheckEvent {
         if (!ModCore.inServer) return;
 
         if (Minecraft.getMinecraft().world == null) {
-            System.out.println("(SPacketEntityTeleport) WORLD IS NULL!!!");
             return;
         }
         final Entity entity = Minecraft.getMinecraft().world.getEntityByID(event.getPacket().getEntityId());
@@ -62,7 +61,6 @@ public class ArmorCheckEvent {
         if (!ModCore.inServer) return;
 
         if (Minecraft.getMinecraft().world == null) {
-            System.out.println("(SPacketEntityVelocity) WORLD IS NULL!!!");
             return;
         }
         final Entity entity = Minecraft.getMinecraft().world.getEntityByID(event.getPacket().getEntityID());
@@ -79,7 +77,6 @@ public class ArmorCheckEvent {
         if (!ModCore.inServer) return;
 
         if (Minecraft.getMinecraft().world == null) {
-            System.out.println("(SPacketEntity) WORLD IS NULL!!!");
             return;
         }
         final Entity entity = event.getPacket().getEntity(Minecraft.getMinecraft().world);
@@ -104,7 +101,6 @@ public class ArmorCheckEvent {
 
         if (event.getPacket().getDataManagerEntries().isEmpty()) return;
         if (Minecraft.getMinecraft().world == null) {
-            System.out.println("(SPacketEntityMetadata) WORLD IS NULL!!!");
             return;
         }
         final Entity entity = Minecraft.getMinecraft().world.getEntityByID(event.getPacket().getEntityId());
