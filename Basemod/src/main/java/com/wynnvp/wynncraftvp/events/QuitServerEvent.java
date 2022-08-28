@@ -6,6 +6,7 @@ import com.wynnvp.wynncraftvp.npc.NPCHandler;
 import com.wynnvp.wynncraftvp.npc.QuestMarkHandler;
 import com.wynnvp.wynncraftvp.packet.PacketIncomingFilter;
 import com.wynnvp.wynncraftvp.sound.SoundPlayer;
+import com.wynnvp.wynncraftvp.sound.custom.SoundController;
 import com.wynnvp.wynncraftvp.utils.VersionChecker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDisconnected;
@@ -29,6 +30,7 @@ public class QuitServerEvent {
         //SoundPlayer.SPEAKING = false;
         NPCHandler.getNamesHandlers().clear();
         QuestMarkHandler.getWichQuest().clear();
+        SoundController.cSoundThreads.clear();
     }
 
     @SubscribeEvent
@@ -38,6 +40,7 @@ public class QuitServerEvent {
             //SoundPlayer.SPEAKING = false;
             QuestMarkHandler.getWichQuest().clear();
             NPCHandler.getNamesHandlers().clear();
+            SoundController.cSoundThreads.clear();
         }
     }
 
