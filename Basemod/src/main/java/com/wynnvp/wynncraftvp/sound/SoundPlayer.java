@@ -4,40 +4,28 @@ import com.wynnvp.wynncraftvp.ModCore;
 import com.wynnvp.wynncraftvp.config.ConfigHandler;
 import com.wynnvp.wynncraftvp.npc.NPCHandler;
 import com.wynnvp.wynncraftvp.npc.QuestMarkHandler;
+import com.wynnvp.wynncraftvp.sound.custom.CSoundThread;
 import com.wynnvp.wynncraftvp.sound.custom.SoundController;
-import com.wynnvp.wynncraftvp.sound.custom.thread.MonoThread;
-import com.wynnvp.wynncraftvp.sound.custom.thread.StereoThread;
 import com.wynnvp.wynncraftvp.sound.line.LineData;
 import com.wynnvp.wynncraftvp.sound.line.LineReporter;
 import com.wynnvp.wynncraftvp.utils.Utils;
-import javazoom.jl.player.advanced.AdvancedPlayer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.Vec3d;
-import paulscode.sound.SoundSystemException;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.wynnvp.wynncraftvp.sound.custom.SoundController.loadMono;
 import static com.wynnvp.wynncraftvp.sound.custom.SoundController.loadStereo;
+import static com.wynnvp.wynncraftvp.utils.Utils.minecraft;
+import static com.wynnvp.wynncraftvp.utils.Utils.sendClientChatMessage;
 
 public class SoundPlayer {
 
-    private Thread musicThread = null;
-    private AdvancedPlayer player = null;
-
-    private final List<String> latestSoundPlayed;
+    private final List<String> latestSoundPlayed = new ArrayList<>();
     private final LineReporter lineReporter;
-    //public static boolean SPEAKING = false;
 
     public SoundPlayer() {
-        latestSoundPlayed = new ArrayList<>();
         lineReporter = new LineReporter();
     }
 
@@ -47,21 +35,19 @@ public class SoundPlayer {
         SoundsHandler soundsHandler = ModCore.instance.soundsHandler;
         if (!soundsHandler.get(line).isPresent()) {
            // System.out.println("Does not contain line: " + lineData.getRealLine());
-            lineReporter.MissingLine(lineData);
+            lineReporter.missingLine(lineData);
             return;
         }
         if (isOnCoolDown(line)) {
-            System.out.println("Sound: " + line + " is on cooldown.");
+            //System.out.println("Sound: " + line + " is on cooldown.");
             return;
         }
 
-        if (Minecraft.getMinecraft().player == null) {
-            System.out.println("Player is null! Sound not played.");
+        if (minecraft().player == null) {
             return;
         }
 
-        if (Minecraft.getMinecraft().world == null) {
-            System.out.println("World is null! Sound not played.");
+        if (minecraft().world == null) {
             return;
         }
 
@@ -70,14 +56,17 @@ public class SoundPlayer {
         soundsHandler.get(line).ifPresent(sound -> {
             final CustomSoundClass customSoundClass = sound.getCustomSoundClass();
             final File audioFile = new File(Utils.FILE_ROOT, getQuest(sound.getId())+"/"+sound.getId()+".ogg");
+            if (!audioFile.exists()) {
+                return;
+            }
             //Solves ArmorStand problem with ??? as name
             //WARNING: not yet tested
             QuestMarkHandler.put(getQuest(sound.getId()));
 
+            SoundController.cSoundThreads.forEach(cSoundThread -> cSoundThread.setStopped(true));
+            SoundController.cSoundThreads.removeIf(CSoundThread::isStopped);
+
             //If this is a moving sound or it is set to play all sounds on player
-            //ModCore.instance.controller.playAtPlayer(new File("C:/Users/ender/AppData/Roaming/.minecraft/wynnvp/kingsrecruit/kingsrecruit-caravandriver-2.ogg"));
-            //ModCore.instance.controller.playAtPlayer(new File(Utils.FILE_ROOT, getQuest(sound.getId())+"/"+sound.getId()+".ogg"));
-            SoundController.cSoundThreads.values().forEach(cSoundThread -> cSoundThread.setStopped(true));
             if (customSoundClass.isMovingSound() || ConfigHandler.playAllSoundsOnPlayer) {
                 loadMono(audioFile).start();
                 addSoundToCoolDown(line);
@@ -85,13 +74,13 @@ public class SoundPlayer {
             }
             String rawName = getRawName(sound.getId());
             if (NPCHandler.getNamesHandlers().containsKey(rawName)) {
-               NPCHandler.find(rawName).ifPresent(vector -> {
-                   if (Minecraft.getMinecraft().player.getDistance(vector.x, vector.y, vector.z) >= 20) {
-                       loadStereo(audioFile, Minecraft.getMinecraft().player.getPositionVector()).start();
-                   } else {
-                       loadStereo(audioFile, rawName).start();
-                   }
-               });
+                NPCHandler.find(rawName).ifPresent(vector -> {
+                    if (Minecraft.getMinecraft().player.getDistance(vector.x, vector.y, vector.z) >= 20) {
+                        loadStereo(audioFile, Minecraft.getMinecraft().player.getPositionVector()).start();
+                    } else {
+                        loadStereo(audioFile, rawName).start();
+                    }
+                });
             } else {
                 loadStereo(audioFile, Minecraft.getMinecraft().player.getPositionVector()).start();
             }
@@ -99,10 +88,10 @@ public class SoundPlayer {
         });
     }
 
-    private void playSoundAtCoords(Vec3d blockPos, SoundEvent soundEvent) {
+    /*private void playSoundAtCoords(Vec3d blockPos, SoundEvent soundEvent) {
         EntityPlayerSP player = Minecraft.getMinecraft().player;
         player.getEntityWorld().playSound(blockPos.x, blockPos.y, blockPos.z, soundEvent, SoundCategory.VOICE, ConfigHandler.blockCutOff / 16f, 1, false);
-    }
+    }*/
 
     private String getQuest(String id) {
         String result = "none";
@@ -130,24 +119,6 @@ public class SoundPlayer {
 
     public void clearCoolDown() {
         latestSoundPlayed.clear();
-    }
-
-    public void play(File file) throws SoundSystemException {
-        musicThread = new Thread(() -> {
-            try {
-                FileInputStream fileInputStream = new FileInputStream(file);
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-                float baseVolume = -32 + (32 * Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS));
-                //player = new AdvancedPlayer(bufferedInputStream, baseVolume);
-                fileInputStream.close();
-                bufferedInputStream.close();
-
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        });
-        musicThread.setName("VoW - Sound Player");
-        musicThread.start();
     }
 
 }

@@ -21,6 +21,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.*;
 
+import static com.wynnvp.wynncraftvp.utils.Utils.*;
+
 public class ArmorCheckEvent {
 
     private static final int DISTANCE_MULTI = 2;
@@ -33,10 +35,9 @@ public class ArmorCheckEvent {
     @SubscribeEvent
     public void onTickEvent(TickEvent.ClientTickEvent event) {
         if (!ModCore.inServer) return;
+        if (!inWynn()) return;
         if (NPCHandler.getNamesHandlers().isEmpty()) return;
-        if (ticks % 20 == 0) {
-            checkArround();
-        }
+        if (ticks % 20 == 0) checkArround();
         ticks++;
     }
 
@@ -44,11 +45,9 @@ public class ArmorCheckEvent {
     @SubscribeEvent
     public void onPacketTeleport(PacketEvent.Incoming<SPacketEntityTeleport> event) {
         if (!ModCore.inServer) return;
-
-        if (Minecraft.getMinecraft().world == null) {
-            return;
-        }
-        final Entity entity = Minecraft.getMinecraft().world.getEntityByID(event.getPacket().getEntityId());
+        if (!inWynn()) return;
+        if (world() == null) return;
+        final Entity entity = world().getEntityByID(event.getPacket().getEntityId());
         if (entity == null) return;
         if (entity instanceof EntityArmorStand) {
             final EntityArmorStand armorStand = (EntityArmorStand) entity;
@@ -59,11 +58,9 @@ public class ArmorCheckEvent {
     @SubscribeEvent
     public void onPacketVelocity(PacketEvent.Incoming<SPacketEntityVelocity> event) {
         if (!ModCore.inServer) return;
-
-        if (Minecraft.getMinecraft().world == null) {
-            return;
-        }
-        final Entity entity = Minecraft.getMinecraft().world.getEntityByID(event.getPacket().getEntityID());
+        if (!inWynn()) return;
+        if (world() == null) return;
+        final Entity entity = world().getEntityByID(event.getPacket().getEntityID());
         if (entity == null) return;
         if (entity instanceof EntityArmorStand) {
             final EntityArmorStand armorStand = (EntityArmorStand) entity;
@@ -75,11 +72,9 @@ public class ArmorCheckEvent {
     @SubscribeEvent
     public void onPacketEntity(PacketEvent.Incoming<SPacketEntity> event) {
         if (!ModCore.inServer) return;
-
-        if (Minecraft.getMinecraft().world == null) {
-            return;
-        }
-        final Entity entity = event.getPacket().getEntity(Minecraft.getMinecraft().world);
+        if (!inWynn()) return;
+        if (world() == null) return;
+        final Entity entity = event.getPacket().getEntity(world());
         if (entity instanceof EntityArmorStand) {
             final boolean visible = ReflectionUtils.isNameVisibleFromMetadata(entity.getDataManager().getAll());
             if (!visible) return;
@@ -93,17 +88,17 @@ public class ArmorCheckEvent {
     @SubscribeEvent
     public void onReceivePacket(PacketEvent.Incoming<SPacketEntityMetadata> event) {
         if (!ModCore.inServer) return;
-
-        if (!Minecraft.getMinecraft().isCallingFromMinecraftThread()) {
-            Minecraft.getMinecraft().addScheduledTask(() -> onReceivePacket(event));
+        if (!inWynn()) return;
+        if (!minecraft().isCallingFromMinecraftThread()) {
+            minecraft().addScheduledTask(() -> onReceivePacket(event));
             return;
         }
 
         if (event.getPacket().getDataManagerEntries().isEmpty()) return;
-        if (Minecraft.getMinecraft().world == null) {
+        if (world() == null) {
             return;
         }
-        final Entity entity = Minecraft.getMinecraft().world.getEntityByID(event.getPacket().getEntityId());
+        final Entity entity = world().getEntityByID(event.getPacket().getEntityId());
         if (entity == null) return;
         if (entity instanceof EntityArmorStand) {
             final String name = ReflectionUtils.getNameFromMetadata(event.getPacket().getDataManagerEntries());
@@ -132,13 +127,13 @@ public class ArmorCheckEvent {
     }
 
     private void checkArround() {
-        if (Minecraft.getMinecraft().player == null) return;
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        EntityPlayerSP player = player();
+        if (player == null) return;
 
         final Map<String, Vec3d> setToRemove = new HashMap<>();
         for (Map.Entry<String, List<Vec3d>> value : NPCHandler.getNamesHandlers().entrySet()) {
             for (Vec3d vec3d : value.getValue()) {
-                final double distance = player.getDistance(vec3d.x, vec3d.y, vec3d.z);
+                final double distance = vec3d.distanceTo(player.getPositionVector());
                 final int multiply = DISTANCE_MULTI*BLOCKS_PER_BLOCKS;
                 if (distance >= multiply || distance <= -(multiply)) {
                     setToRemove.put(value.getKey(), vec3d);

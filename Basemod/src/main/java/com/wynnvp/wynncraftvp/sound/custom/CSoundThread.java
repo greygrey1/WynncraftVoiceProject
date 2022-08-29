@@ -1,26 +1,18 @@
 package com.wynnvp.wynncraftvp.sound.custom;
 
+import net.minecraft.util.SoundCategory;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.SourceDataLine;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 
+import static com.wynnvp.wynncraftvp.utils.Utils.inWynn;
+import static com.wynnvp.wynncraftvp.utils.Utils.minecraft;
 import static javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED;
 
 public abstract class CSoundThread extends Thread {
 
     protected boolean stopped = false;
-
-    protected void read(AudioInputStream audioInputStream, SourceDataLine sourceDataLine, byte[] buffer) throws IOException {
-        for (int i = 0; i != -1; i = audioInputStream.read(buffer, 0, buffer.length)) {
-            if (stopped) break;
-            sourceDataLine.write(buffer, 0, i);
-        }
-    }
-
-    protected void read(AudioInputStream audioInputStream, SourceDataLine sourceDataLine) throws IOException {
-        read(audioInputStream, sourceDataLine, new byte[65536]);
-    }
 
     protected AudioFormat getMonoFormat(float rate) {
         return new AudioFormat(PCM_SIGNED, rate, 16, 1, 2, rate, false);
@@ -34,4 +26,29 @@ public abstract class CSoundThread extends Thread {
         this.stopped = stopped;
     }
 
+    protected byte[] convertForData(AudioInputStream in) {
+        if (stopped) return null;
+        byte[] data = new byte[0];
+        try (final ByteArrayOutputStream baout = new ByteArrayOutputStream()) {
+            final byte[] buffer = new byte[(int) ((48000 / 1000) * 2 * 20)];
+            int c = in.read(buffer, 0, buffer.length);
+            if (c == -1)
+                return null;
+            baout.write(buffer, 0, c);
+            data = baout.toByteArray();
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        }
+        return data;
+    }
+
+    protected void readWrite(AudioInputStream inputStream, CSoundCallback callback) {
+        byte[] monoData;
+        while (inWynn() && (monoData = convertForData(inputStream)) != null)
+            callback.ready(monoData, minecraft().gameSettings.getSoundLevel(SoundCategory.VOICE));
+    }
+
+    public boolean isStopped() {
+        return stopped;
+    }
 }

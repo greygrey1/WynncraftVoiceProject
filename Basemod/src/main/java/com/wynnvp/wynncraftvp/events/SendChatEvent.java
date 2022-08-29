@@ -13,6 +13,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.wynnvp.wynncraftvp.utils.Utils.sendClientChatMessage;
+
 @Mod.EventBusSubscriber
 public class SendChatEvent {
 
@@ -20,8 +22,7 @@ public class SendChatEvent {
     public static void onSendChat(ClientChatEvent event) {
         switch (event.getMessage().toLowerCase()) {
             case "/toggle":
-                SendClientChatMessage("§4To toggle Voices of Wynn speedrun mode type: §6/toggle speedrun. §4To toggle logging do §6/toggle logging");
-
+                sendClientChatMessage("§4To toggle Voices of Wynn speedrun mode type: §6/toggle speedrun. §4To toggle logging do §6/toggle logging");
                 // \n+" +
                 //                        "§4To toggle logging of missing lines: §6/togglelogging"
                 //
@@ -30,7 +31,7 @@ public class SendChatEvent {
                 break;
             case "/toggle speedrun":
                 ConfigHandler.SetPlayAllSoundsOnPlayer(!ConfigHandler.playAllSoundsOnPlayer);
-                SendClientChatMessage("§bSet speedrun mode to §e" + ConfigHandler.playAllSoundsOnPlayer + "§b. This mode makes all sounds follow the player around");
+                sendClientChatMessage("§bSet speedrun mode to §e" + ConfigHandler.playAllSoundsOnPlayer + "§b. This mode makes all sounds follow the player around");
                 event.setCanceled(true);
                 break;
             case "/toggle logging":
@@ -38,18 +39,7 @@ public class SendChatEvent {
                 timer.schedule(new openGui(), 100);
                 event.setCanceled(true);
                 break;
-            case "/load kingsrecruit":
-                SoundsHandler.registerSound("kingsrecruit-caravandriver-2");
-                SoundsHandler.registerSound("kingsrecruit-tasim-2");
-                SoundsHandler.registerSound("kingsrecruit-caravandriver-3");
-                SoundsHandler.registerSound("kingsrecruit-aledar-1");
-                Minecraft.getMinecraft().getSoundHandler().update();
-                break;
         }
-    }
-
-    private static void SendClientChatMessage(String message) {
-        Minecraft.getMinecraft().player.sendMessage(new TextComponentString(message));
     }
 
     private static class openGui extends TimerTask {

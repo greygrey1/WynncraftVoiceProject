@@ -7,13 +7,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
 import net.minecraftforge.common.MinecraftForge;
 
+import static com.wynnvp.wynncraftvp.utils.Utils.minecraft;
+
 public class PacketIncomingFilter extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg == null) return;
 
-        PacketEvent.Incoming<? extends Packet<?>> event = new PacketEvent.Incoming<>((Packet<?>) msg, Minecraft.getMinecraft().getConnection(), this, ctx);
+        PacketEvent.Incoming<? extends Packet<?>> event = new PacketEvent.Incoming<>((Packet<?>) msg, minecraft().getConnection(), this, ctx);
         boolean cancel = MinecraftForge.EVENT_BUS.post(event);
         if (cancel) return;
 

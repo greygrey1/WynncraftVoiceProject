@@ -23,7 +23,7 @@ public class LineReporter {
         reportedLines = new LinkedList<>();
     }
 
-    public void MissingLine(LineData lineData) {
+    public void missingLine(LineData lineData) {
         if (!ConfigHandler.logMissingLines
                 || !ModCore.inLiveWynnServer
         || !LineFormatter.isNPCSentLine(lineData.getRealLine())

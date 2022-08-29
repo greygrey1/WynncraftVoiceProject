@@ -2,22 +2,18 @@ package com.wynnvp.wynncraftvp.sound.custom.thread;
 
 import com.wynnvp.wynncraftvp.npc.NPCHandler;
 import com.wynnvp.wynncraftvp.sound.custom.CSoundThread;
-import com.wynnvp.wynncraftvp.sound.custom.ICSound;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.sound.sampled.*;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
 import static com.wynnvp.wynncraftvp.utils.Utils.*;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 
-public class StereoThread extends CSoundThread implements ICSound {
+public class StereoThread extends CSoundThread {
 
     private final EntityPlayerSP player;
     private final File file;
@@ -29,7 +25,7 @@ public class StereoThread extends CSoundThread implements ICSound {
         setDaemon(true);
         setName("VoW - Stereo Audio");
         this.position = position;
-        this.player = Minecraft.getMinecraft().player;
+        this.player = player();
         this.file = file;
         this.rawName = null;
         this.stopped = false;
@@ -40,7 +36,7 @@ public class StereoThread extends CSoundThread implements ICSound {
         setName("VoW - Stereo Audio");
         this.rawName = rawName;
         NPCHandler.find(rawName).ifPresent(this::setPosition);
-        this.player = Minecraft.getMinecraft().player;
+        this.player = player();
         this.file = file;
         this.stopped = false;
     }
@@ -57,7 +53,6 @@ public class StereoThread extends CSoundThread implements ICSound {
                     stream(getAudioInputStream(stereoFormat, in), line);
                     line.drain();
                     line.stop();
-                    line.flush();
                 }
             } catch (LineUnavailableException e) {
                 e.printStackTrace();
@@ -68,18 +63,26 @@ public class StereoThread extends CSoundThread implements ICSound {
     }
 
     private void stream(AudioInputStream inputStream, SourceDataLine dataLine) {
+        readWrite(inputStream, (audioData, volume) -> {
+            byte[] stereo = convertLocationalToStereo(audioData, volume);
+            dataLine.write(stereo, 0, stereo.length);
+        });
+    }
+
+    /*private void stream(AudioInputStream inputStream, SourceDataLine dataLine) {
         try {
-            byte[] monoData;
-            while ((monoData = convertForData(inputStream)) != null) {
-                byte[] stereo = convertLocationalToStereo(monoData);
+            byte[] audioData;
+            while ((audioData = convertForData(inputStream)) != null) {
+                float volume = minecraft().gameSettings.getSoundLevel(SoundCategory.VOICE);
+                byte[] stereo = convertLocationalToStereo(audioData, volume);
                 dataLine.write(stereo, 0, stereo.length);
             }
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
-    }
+    }*/
 
-    private byte[] convertLocationalToStereo(byte[] monoData) {
+    private byte[] convertLocationalToStereo(byte[] monoData, float volume) {
         updatePosition();
         float distance = (float) position.distanceTo(player.getPositionVector());
         float fadeDistance = 10F;
@@ -89,23 +92,7 @@ public class StereoThread extends CSoundThread implements ICSound {
             percentage = 1F - Math.min((distance - fadeDistance) / (maxDistance - fadeDistance), 1F);
         }
         Pair<Float, Float> stereoVolume = getStereoVolume(player.getPositionVector(), player.rotationYaw, position, maxDistance);
-        return adjustVolumeStereo(monoData, percentage * stereoVolume.getLeft(), percentage * stereoVolume.getRight());
-    }
-
-    private byte[] convertForData(AudioInputStream in) {
-        if (stopped) return null;
-        byte[] data = new byte[0];
-        try (final ByteArrayOutputStream baout = new ByteArrayOutputStream()) {
-            final byte[] buffer = new byte[(int) ((48000 / 1000) * 2 * 20)];
-            int c = in.read(buffer, 0, buffer.length);
-            if (c == -1)
-                return null;
-            baout.write(buffer, 0, c);
-            data = baout.toByteArray();
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-        return data;
+        return adjustVolumeStereo(monoData, volume * percentage * stereoVolume.getLeft(), volume * percentage * stereoVolume.getRight());
     }
 
     public void setPosition(Vec3d position) {

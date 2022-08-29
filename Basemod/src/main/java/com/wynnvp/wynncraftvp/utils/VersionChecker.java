@@ -25,6 +25,7 @@ public class VersionChecker {
     public static void checkVersion() {
 
         JsonObject jsonObject = getVersionCheckFromWebsite();
+        if (jsonObject == null) return;
         String directUpdateLink = jsonObject.get("directUpdateLink").getAsString();
         String fact = jsonObject.get("fact").getAsString();
         float killSwitchVersion = jsonObject.get("killSwitchVersion").getAsFloat();

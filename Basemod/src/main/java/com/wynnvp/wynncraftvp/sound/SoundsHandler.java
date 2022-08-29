@@ -1,36 +1,31 @@
 package com.wynnvp.wynncraftvp.sound;
 
-import com.sun.media.sound.JavaSoundAudioClip;
-import com.wynnvp.wynncraftvp.ModCore;
 import com.wynnvp.wynncraftvp.sound.line.LineData;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.wynnvp.wynncraftvp.utils.LineFormatter.formatToLineData;
 
 public class SoundsHandler {
 
-    //private final List<SoundObject> sounds;
-    private final HashMap<String, SoundObject> sounds;
-    private final Set<String> npcNames;
+    private final HashMap<String, SoundObject> sounds = new HashMap<>();
+    private final Set<String> npcNames = new HashSet<>();
 
     public SoundsHandler() {
-        sounds = new HashMap<>();
-        npcNames = new HashSet<>();
         //sounds = new ArrayList<>();
         registerSounds();
     }
 
-    public static SoundEvent registerSound(String name) {
+    /*public static SoundEvent registerSound(String name) {
         ResourceLocation location = new ResourceLocation(ModCore.MODID, name);
         SoundEvent event = new SoundEvent(location);
         event.setRegistryName(name);
         ForgeRegistries.SOUND_EVENTS.register(event);
         return event;
-    }
+    }*/
 
     /**
      * Method to add the sounds to the system
@@ -41,10 +36,11 @@ public class SoundsHandler {
      *                    otherwise it will move with the ArmorStand
      * */
     private void addSound(String message, String id, boolean movingSound) {
-        LineData lineData = formatToLineData(message);
-        npcNames.add(lineData.getNPCName());
-        message = lineData.getSoundLine();
-        sounds.put(message, new SoundObject(lineData.getNPCName(), id, new CustomSoundClass(registerSound(id), movingSound)));
+        final LineData lineData = formatToLineData(message);
+        if (lineData != null) {
+            npcNames.add(lineData.getNPCName());
+            sounds.put(lineData.getSoundLine(), new SoundObject(lineData.getNPCName(), id, new CustomSoundClass(movingSound)));
+        }
     }
 
     public boolean containsName(String rawName) {

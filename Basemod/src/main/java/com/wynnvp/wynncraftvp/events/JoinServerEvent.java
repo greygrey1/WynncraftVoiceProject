@@ -13,22 +13,18 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.wynnvp.wynncraftvp.utils.Utils.minecraft;
+
 @Mod.EventBusSubscriber
 public class JoinServerEvent {
 
-
-    private static final DecimalFormat df = new DecimalFormat("0.00");
 
     @SubscribeEvent
     public static void onServerJoin(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         //Inject filter of packets
         event.getManager().channel().pipeline().addBefore("fml:packet_handler", ModCore.MODID + ":packet_filter", new PacketIncomingFilter());
-        String serverIP = Objects.requireNonNull(Minecraft.getMinecraft().getCurrentServerData()).serverIP.toLowerCase();
-        if (serverIP.startsWith("play.wynncraft")
-                || serverIP.startsWith("media.wynncraft")
-                //     || serverIP.startsWith("beta.wynncraft")
-                || serverIP.startsWith("lobby.wynncraft")) {
-            System.out.println("Joined Live Wynncraft server");
+        String serverIP = Objects.requireNonNull(minecraft().getCurrentServerData()).serverIP.toLowerCase();
+        if (serverIP.contains("wynncraft")) {
             ModCore.inLiveWynnServer = true;
         }
         ModCore.inServer = true;

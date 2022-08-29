@@ -3,7 +3,6 @@ package com.wynnvp.wynncraftvp;
 import com.wynnvp.wynncraftvp.config.ConfigHandler;
 import com.wynnvp.wynncraftvp.events.ArmorCheckEvent;
 import com.wynnvp.wynncraftvp.events.QuitServerEvent;
-import com.wynnvp.wynncraftvp.events.SoundTickEvent;
 import com.wynnvp.wynncraftvp.sound.custom.SoundController;
 import com.wynnvp.wynncraftvp.sound.SoundPlayer;
 import com.wynnvp.wynncraftvp.sound.SoundsHandler;
@@ -51,7 +50,7 @@ public class ModCore {
         soundsHandler = new SoundsHandler();
         controller = new SoundController();
 
-        StringBlacklist.namesDefault();
+        //StringBlacklist.namesDefault();
 
         MinecraftForge.EVENT_BUS.register(new ArmorCheckEvent());
         //MinecraftForge.EVENT_BUS.register(new SoundTickEvent());

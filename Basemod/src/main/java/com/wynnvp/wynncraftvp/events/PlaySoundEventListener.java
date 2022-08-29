@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 @Mod.EventBusSubscriber
 public class PlaySoundEventListener {
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     public static void onPlaySound(PlaySoundEvent event) {
         if (!event.getSound().getCategory().getName().equalsIgnoreCase("master")){
             return;
@@ -84,5 +84,5 @@ public class PlaySoundEventListener {
             }
         };
         event.setResultSound(resultSound);
-    }
+    }*/
 }

@@ -27,7 +27,6 @@ public class QuitServerEvent {
         ModCore.inServer = false;
         ModCore.inLiveWynnServer = false;
 
-        //SoundPlayer.SPEAKING = false;
         NPCHandler.getNamesHandlers().clear();
         QuestMarkHandler.getWichQuest().clear();
         SoundController.cSoundThreads.clear();
@@ -37,7 +36,8 @@ public class QuitServerEvent {
     public void onServerQuit(GuiOpenEvent event) {
         if (ModCore.inServer && event.getGui() instanceof GuiDisconnected) {
             ModCore.inServer = false;
-            //SoundPlayer.SPEAKING = false;
+            ModCore.inLiveWynnServer = false;
+
             QuestMarkHandler.getWichQuest().clear();
             NPCHandler.getNamesHandlers().clear();
             SoundController.cSoundThreads.clear();

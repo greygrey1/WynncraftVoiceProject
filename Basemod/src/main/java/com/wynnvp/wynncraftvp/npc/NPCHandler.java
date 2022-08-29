@@ -1,9 +1,10 @@
 package com.wynnvp.wynncraftvp.npc;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
+
+import static com.wynnvp.wynncraftvp.utils.Utils.minecraft;
 
 public class NPCHandler {
 
@@ -25,10 +26,10 @@ public class NPCHandler {
     public static Optional<Vec3d> find(String rawNames) {
         Vec3d result;
         final List<Vec3d> list = namesHandlers.getOrDefault(rawNames, new ArrayList<>());
-        if (Minecraft.getMinecraft().player == null) {
+        if (minecraft().player == null) {
             return list.stream().findAny();
         }
-        final Vec3d playerPosition = Minecraft.getMinecraft().player.getPositionVector();
+        final Vec3d playerPosition = minecraft().player.getPositionVector();
         try {
             result = list.stream()
                     .sorted(Comparator.comparingDouble(o -> o.distanceTo(playerPosition)))

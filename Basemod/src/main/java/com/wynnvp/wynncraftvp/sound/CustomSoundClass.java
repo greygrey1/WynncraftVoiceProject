@@ -4,11 +4,15 @@ import net.minecraft.util.SoundEvent;
 
 public class CustomSoundClass {
 
-    private final SoundEvent soundEvent;
+    private SoundEvent soundEvent;
     private final boolean movingSound;
 
     public CustomSoundClass(SoundEvent soundEvent, boolean movingSound) {
         this.soundEvent = soundEvent;
+        this.movingSound = movingSound;
+    }
+
+    public CustomSoundClass(boolean movingSound) {
         this.movingSound = movingSound;
     }
 

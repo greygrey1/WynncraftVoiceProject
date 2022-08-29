@@ -5,7 +5,7 @@ import com.wynnvp.wynncraftvp.sound.line.LineData;
 public class LineFormatter {
 
     public static LineData formatToLineData(String message) {
-        LineData lineData = new LineData();
+        final LineData lineData = new LineData();
 
         if (message.contains("iso95bf")) { // unnatural message
             return null;

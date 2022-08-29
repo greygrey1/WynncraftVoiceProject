@@ -6,31 +6,29 @@ import net.minecraft.util.math.Vec3d;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SoundController {
 
-    public static final HashMap<SoundType, CSoundThread> cSoundThreads = new HashMap<>();
+    public static final Set<CSoundThread> cSoundThreads = new HashSet<>();
 
     public static MonoThread loadMono(File file) {
         MonoThread monoThread = new MonoThread(file);
-        cSoundThreads.put(SoundType.MONO, monoThread);
+        cSoundThreads.add(monoThread);
         return monoThread;
     }
 
     public static StereoThread loadStereo(File file, Vec3d position) {
         StereoThread stereoThread = new StereoThread(position, file);
-        cSoundThreads.put(SoundType.STEREO, stereoThread);
+        cSoundThreads.add(stereoThread);
         return stereoThread;
     }
 
     public static StereoThread loadStereo(File file, String rawName) {
         StereoThread stereoThread = new StereoThread(rawName, file);
-        cSoundThreads.put(SoundType.STEREO, stereoThread);
+        cSoundThreads.add(stereoThread);
         return stereoThread;
-    }
-
-    public enum SoundType {
-        MONO, STEREO
     }
 
 }

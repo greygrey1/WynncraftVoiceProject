@@ -3,26 +3,48 @@ package com.wynnvp.wynncraftvp.utils;
 import com.wynnvp.wynncraftvp.ModCore;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 public class Utils {
 
-    public static final File FILE_ROOT = new File(Minecraft.getMinecraft().gameDir, ModCore.MODID);
+    public static final File FILE_ROOT = new File(minecraft().gameDir, ModCore.MODID);
+
+    public static Minecraft minecraft() {
+        return Minecraft.getMinecraft();
+    }
+
+    public static WorldClient world() {
+        return minecraft().world;
+    }
+
+    public static EntityPlayerSP player() {
+        return minecraft().player;
+    }
 
     //Checks if the players is even on wynn
     public static boolean inWynn() {
-        try {
-            return Minecraft.getMinecraft().getCurrentServerData().serverIP.toLowerCase().contains("wynncraft");
+        return ModCore.inLiveWynnServer;
+        /*try {
+            ServerData serverData = Minecraft.getMinecraft().getCurrentServerData();
+            return serverData != null && serverData.serverIP.toLowerCase().contains("wynncraft");
         } catch (NullPointerException e) {
             return false;
-        }
+        }*/
+    }
+
+    public static void sendClientChatMessage(String message) {
+        minecraft().player.sendMessage(new TextComponentString(message));
     }
 
     //Returns the path to the sound file in the format that is used in the JSON
@@ -40,7 +62,7 @@ public class Utils {
     public static String sha256(final String base) {
         try{
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            final byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            final byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
             final StringBuilder hexString = new StringBuilder();
             for (int i = 0; i < hash.length; i++) {
                 final String hex = Integer.toHexString(0xff & hash[i]);
@@ -62,6 +84,16 @@ public class Utils {
         for (int i = 0; i < audio.length; i += 2) {
             short audioSample = bytesToShort(audio[i], audio[i + 1]);
             audioSample = (short) (audioSample * (i % 4 == 0 ? volumeLeft : volumeRight));
+            audio[i] = (byte) audioSample;
+            audio[i + 1] = (byte) (audioSample >> 8);
+        }
+        return audio;
+    }
+
+    public static byte[] adjustVolumeMono(byte[] audio, float volume) {
+        for (int i = 0; i < audio.length; i += 2) {
+            short audioSample = bytesToShort(audio[i], audio[i + 1]);
+            audioSample = (short) (audioSample * volume);
             audio[i] = (byte) audioSample;
             audio[i + 1] = (byte) (audioSample >> 8);
         }

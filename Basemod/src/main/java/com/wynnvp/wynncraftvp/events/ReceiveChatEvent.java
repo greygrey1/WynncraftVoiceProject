@@ -11,6 +11,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import javax.vecmath.Vector3f;
 
+import static com.wynnvp.wynncraftvp.utils.Utils.player;
+
 @Mod.EventBusSubscriber
 public class
 ReceiveChatEvent {
@@ -28,14 +30,7 @@ ReceiveChatEvent {
 
         //Replace player Name with "soldier"
         String name = GetPlayerName(event.getMessage().toString());
-
-        if (msg.contains(name)) {
-            msg = msg.replace(name, "soldier");
-            //System.out.println("Replaced player name!");
-        }
-
-
-        LineData lineData = LineFormatter.formatToLineData(msg);
+        LineData lineData = LineFormatter.formatToLineData(msg.replace(name, "soldier"));
 
         if (lineData == null) { // invalid line data returned
             return;
@@ -52,13 +47,13 @@ ReceiveChatEvent {
 
 
     private static boolean isInMixedFeelingsQuest() {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        EntityPlayerSP player = player();
         return player.getDistance(mixedFeelingsNPC1.x, mixedFeelingsNPC1.y, mixedFeelingsNPC1.z) < 250;
 
     }
 
     private static String getMixedFeelingsLine(String msg) {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        EntityPlayerSP player = player();
 
         if (player.getDistance(mixedFeelingsNPC1.x, mixedFeelingsNPC1.y, mixedFeelingsNPC1.z) < 15) {
             msg = GetRightMixedFeelingsLine("mixedfeelingscorkuscitycitizen1", msg);
