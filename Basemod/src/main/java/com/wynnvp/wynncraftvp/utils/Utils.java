@@ -13,7 +13,12 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 
 public class Utils {
@@ -139,6 +144,26 @@ public class Utils {
 
     private static float angle(Vec2f vec1, Vec2f vec2) {
         return (float) Math.toDegrees(Math.atan2(vec1.x * vec2.x + vec1.y * vec2.y, vec1.x * vec2.y - vec1.y * vec2.x));
+    }
+
+    /**
+     * Copy a file from source to destination.
+     *
+     * @param source
+     *        the source
+     * @param destination
+     *        the destination
+     * @return True if succeeded , False if not
+     */
+    public static boolean copy(InputStream source , String destination) {
+        boolean succeess = true;
+        try {
+            Files.copy(source, Paths.get(destination), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            succeess = false;
+        }
+        return succeess;
     }
 
 }

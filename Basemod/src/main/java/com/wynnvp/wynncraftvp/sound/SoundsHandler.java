@@ -67,6 +67,12 @@ public class SoundsHandler {
                 .findAny().orElse(null);
     }
 
+    public Set<String> ids() {
+        Set<String> result = new HashSet<>();
+        sounds.values().forEach(soundObject -> result.add(soundObject.getId()));
+        return result;
+    }
+
     public void registerSounds() {
         //Talking Mushroom
         addSound("[1/1] Talking Mushroom: PRICK.", "talkingmushroomprick", true);

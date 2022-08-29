@@ -3,10 +3,11 @@ package com.wynnvp.wynncraftvp;
 import com.wynnvp.wynncraftvp.config.ConfigHandler;
 import com.wynnvp.wynncraftvp.events.ArmorCheckEvent;
 import com.wynnvp.wynncraftvp.events.QuitServerEvent;
-import com.wynnvp.wynncraftvp.sound.custom.SoundController;
+import com.wynnvp.wynncraftvp.sound.SoundLoader;
 import com.wynnvp.wynncraftvp.sound.SoundPlayer;
 import com.wynnvp.wynncraftvp.sound.SoundsHandler;
-import com.wynnvp.wynncraftvp.utils.StringBlacklist;
+import com.wynnvp.wynncraftvp.sound.custom.SoundController;
+import com.wynnvp.wynncraftvp.utils.Utils;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -49,6 +50,8 @@ public class ModCore {
         soundPlayer = new SoundPlayer();
         soundsHandler = new SoundsHandler();
         controller = new SoundController();
+        if (!Utils.FILE_ROOT.exists())
+            Utils.FILE_ROOT.mkdir();
 
         //StringBlacklist.namesDefault();
 
@@ -56,6 +59,8 @@ public class ModCore {
         //MinecraftForge.EVENT_BUS.register(new SoundTickEvent());
         MinecraftForge.EVENT_BUS.register(new QuitServerEvent());
         instance = this;
+
+        SoundLoader.loadSounds();
     }
 
 
