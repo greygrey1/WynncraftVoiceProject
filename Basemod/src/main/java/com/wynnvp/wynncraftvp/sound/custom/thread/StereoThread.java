@@ -2,6 +2,7 @@ package com.wynnvp.wynncraftvp.sound.custom.thread;
 
 import com.wynnvp.wynncraftvp.npc.NPCHandler;
 import com.wynnvp.wynncraftvp.sound.custom.CSoundThread;
+import com.wynnvp.wynncraftvp.sound.custom.SoundController;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,35 +55,27 @@ public class StereoThread extends CSoundThread {
                     line.drain();
                     line.stop();
                 }
-            } catch (LineUnavailableException e) {
-                e.printStackTrace();
             }
-        } catch (UnsupportedAudioFileException | IOException e) {
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
+        } finally {
+            SoundController.cSoundThreads.remove(this);
         }
     }
 
     private void stream(AudioInputStream inputStream, SourceDataLine dataLine) {
         readWrite(inputStream, (audioData, volume) -> {
             byte[] stereo = convertLocationalToStereo(audioData, volume);
+            if (stereo == null) {
+                stopped = true;
+                return;
+            }
             dataLine.write(stereo, 0, stereo.length);
         });
     }
 
-    /*private void stream(AudioInputStream inputStream, SourceDataLine dataLine) {
-        try {
-            byte[] audioData;
-            while ((audioData = convertForData(inputStream)) != null) {
-                float volume = minecraft().gameSettings.getSoundLevel(SoundCategory.VOICE);
-                byte[] stereo = convertLocationalToStereo(audioData, volume);
-                dataLine.write(stereo, 0, stereo.length);
-            }
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-    }*/
-
     private byte[] convertLocationalToStereo(byte[] monoData, float volume) {
+        if (monoData == null) return null;
         updatePosition();
         float distance = (float) position.distanceTo(player.getPositionVector());
         float fadeDistance = 10F;

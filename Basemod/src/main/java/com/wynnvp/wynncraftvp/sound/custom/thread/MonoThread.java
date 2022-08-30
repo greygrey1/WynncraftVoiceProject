@@ -35,25 +35,21 @@ public class MonoThread extends CSoundThread {
                     line.drain();
                     line.stop();
                 }
-            } catch (LineUnavailableException e) {
-                e.printStackTrace();
             }
-        } catch (UnsupportedAudioFileException | IOException e) {
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
     }
 
     private void stream(AudioInputStream audioInputStream, SourceDataLine sourceDataLine) throws IOException {
-        try {
-            byte[] audioData;
-            while ((audioData = convertForData(audioInputStream)) != null) {
-                float volume = minecraft().gameSettings.getSoundLevel(SoundCategory.VOICE);
-                byte[] mono = adjustVolumeMono(audioData, volume);
-                sourceDataLine.write(mono, 0, mono.length);
+        readWrite(audioInputStream, (audioData, volume) -> {
+            byte[] mono = adjustVolumeMono(audioData, volume);
+            if (mono == null) {
+                stopped = true;
+                return;
             }
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
+            sourceDataLine.write(mono, 0, mono.length);
+        });
     }
 
 }

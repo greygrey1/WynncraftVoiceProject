@@ -96,6 +96,7 @@ public class Utils {
     }
 
     public static byte[] adjustVolumeMono(byte[] audio, float volume) {
+        if (audio == null) return null;
         for (int i = 0; i < audio.length; i += 2) {
             short audioSample = bytesToShort(audio[i], audio[i + 1]);
             audioSample = (short) (audioSample * volume);

@@ -10,6 +10,7 @@ import com.wynnvp.wynncraftvp.sound.line.LineData;
 import com.wynnvp.wynncraftvp.sound.line.LineReporter;
 import com.wynnvp.wynncraftvp.utils.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,8 +18,7 @@ import java.util.List;
 
 import static com.wynnvp.wynncraftvp.sound.custom.SoundController.loadMono;
 import static com.wynnvp.wynncraftvp.sound.custom.SoundController.loadStereo;
-import static com.wynnvp.wynncraftvp.utils.Utils.minecraft;
-import static com.wynnvp.wynncraftvp.utils.Utils.sendClientChatMessage;
+import static com.wynnvp.wynncraftvp.utils.Utils.*;
 
 public class SoundPlayer {
 
@@ -43,28 +43,28 @@ public class SoundPlayer {
             return;
         }
 
-        if (minecraft().player == null) {
+        if (player() == null) {
             return;
         }
 
-        if (minecraft().world == null) {
+        if (world() == null) {
             return;
         }
 
-        //System.out.println("Playing sound: " + line);
-        //Minecraft.getMinecraft().getSoundHandler().stopSounds();
+
         soundsHandler.get(line).ifPresent(sound -> {
             final CustomSoundClass customSoundClass = sound.getCustomSoundClass();
             final File audioFile = new File(Utils.FILE_ROOT, getQuest(sound.getId())+"/"+sound.getId()+".ogg");
-            if (!audioFile.exists()) {
-                return;
-            }
+            if (!audioFile.exists()) return;
+
             //Solves ArmorStand problem with ??? as name
             //WARNING: not yet tested
             QuestMarkHandler.put(getQuest(sound.getId()));
 
-            SoundController.cSoundThreads.forEach(cSoundThread -> cSoundThread.setStopped(true));
-            SoundController.cSoundThreads.removeIf(CSoundThread::isStopped);
+            if (!SoundController.cSoundThreads.isEmpty()) {
+                SoundController.cSoundThreads.forEach(cSoundThread -> cSoundThread.setStopped(true));
+                SoundController.cSoundThreads.removeIf(CSoundThread::isStopped);
+            }
 
             //If this is a moving sound or it is set to play all sounds on player
             if (customSoundClass.isMovingSound() || ConfigHandler.playAllSoundsOnPlayer) {
@@ -72,26 +72,23 @@ public class SoundPlayer {
                 addSoundToCoolDown(line);
                 return;
             }
-            String rawName = getRawName(sound.getId());
+            final Vec3d playerPositiion = player().getPositionVector();
+            final String rawName = getRawName(sound.getId());
+
             if (NPCHandler.getNamesHandlers().containsKey(rawName)) {
                 NPCHandler.find(rawName).ifPresent(vector -> {
-                    if (Minecraft.getMinecraft().player.getDistance(vector.x, vector.y, vector.z) >= 20) {
-                        loadStereo(audioFile, Minecraft.getMinecraft().player.getPositionVector()).start();
+                    if (vector.distanceTo(playerPositiion) >= 20) {
+                        loadStereo(audioFile, playerPositiion).start();
                     } else {
                         loadStereo(audioFile, rawName).start();
                     }
                 });
             } else {
-                loadStereo(audioFile, Minecraft.getMinecraft().player.getPositionVector()).start();
+                loadStereo(audioFile, playerPositiion).start();
             }
             addSoundToCoolDown(line);
         });
     }
-
-    /*private void playSoundAtCoords(Vec3d blockPos, SoundEvent soundEvent) {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
-        player.getEntityWorld().playSound(blockPos.x, blockPos.y, blockPos.z, soundEvent, SoundCategory.VOICE, ConfigHandler.blockCutOff / 16f, 1, false);
-    }*/
 
     private String getQuest(String id) {
         String result = "none";

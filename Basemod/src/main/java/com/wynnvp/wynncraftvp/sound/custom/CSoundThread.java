@@ -43,9 +43,8 @@ public abstract class CSoundThread extends Thread {
     }
 
     protected void readWrite(AudioInputStream inputStream, CSoundCallback callback) {
-        byte[] monoData;
-        while (inWynn() && (monoData = convertForData(inputStream)) != null)
-            callback.ready(monoData, minecraft().gameSettings.getSoundLevel(SoundCategory.VOICE));
+        while (inWynn() && !stopped)
+            callback.ready(convertForData(inputStream), minecraft().gameSettings.getSoundLevel(SoundCategory.VOICE));
     }
 
     public boolean isStopped() {

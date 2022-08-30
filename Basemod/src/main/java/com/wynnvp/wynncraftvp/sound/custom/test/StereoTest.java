@@ -10,10 +10,12 @@ import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 
 public class StereoTest {
 
-    /*public static void main(String[] args) {
+    public static void main(String[] args) {
         File file = new File("C:/Users/ender/AppData/Roaming/.minecraft/wynnvp/kingsrecruit/kingsrecruit-caravandriver-2.ogg");
         new StereoTest().play(file);
-    }*/
+    }
+
+    int dataLength = (int) ((48000 / 1000) * 2 * 20);
 
     public void play(File file) {
         try (AudioInputStream in = AudioSystem.getAudioInputStream(file)) {
@@ -40,11 +42,13 @@ public class StereoTest {
 
     private void stream(AudioInputStream in, SourceDataLine line) {
         try {
-            byte[] monoData;
+            boolean stopped = false;
             float left = 0f;
             float right = 1f;
-            while ((monoData = convertForData(in)) != null) {
-                byte[] stereo = adjustVolumeStereo(monoData, Math.min(left, 1f), Math.max(right, 0f));
+            while (true) {
+                byte[] stereo = adjustVolumeStereo(convertForData(in), Math.min(left, 1f), Math.max(right, 0f));
+                if (stereo == null)
+                    break;
                 line.write(stereo, 0, stereo.length);
                 left += 0.005f;
                 right -= 0.005f;
@@ -57,7 +61,7 @@ public class StereoTest {
     private byte[] convertForData(AudioInputStream in) {
         byte[] data = new byte[0];
         try (final ByteArrayOutputStream baout = new ByteArrayOutputStream()) {
-            final byte[] buffer = new byte[(int) ((48000 / 1000) * 2 * 20)];
+            final byte[] buffer = new byte[dataLength];
             int c = in.read(buffer, 0, buffer.length);
             if (c == -1)
                 return null;
@@ -78,6 +82,8 @@ public class StereoTest {
     }
 
     public byte[] adjustVolumeStereo(byte[] audio, float volumeLeft, float volumeRight) {
+        if (audio == null)
+            return null;
         for (int i = 0; i < audio.length; i += 2) {
             short audioSample = bytesToShort(audio[i], audio[i + 1]);
 
