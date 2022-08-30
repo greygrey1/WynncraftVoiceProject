@@ -20,6 +20,7 @@ public class ConfigHandler {
     public static boolean sendFunFact;
     public static int blockCutOff;
     public static int maxCoolDownLines;
+    public static boolean downloadedAudios;
 
 
     private static final String category = "Settings";
@@ -36,6 +37,7 @@ public class ConfigHandler {
         hasShownReportLineGui = config.getBoolean("hasShownReportLineGui", ConfigHandler.category, false, "If the Report line gui has been shown");
         blockCutOff = config.getInt("blockCutOff", ConfigHandler.category, 32, 16, 10000, "At what distance voices become unhearable");
         maxCoolDownLines = config.getInt("maxCoolDownLines", ConfigHandler.category, 2, 1, 10000, "How many different sound files can be on cooldown.");
+        downloadedAudios = config.getBoolean("downloadedAudio", ConfigHandler.category, false, "If all the audios have been downloaded");
 
         config.save();
     }
@@ -46,11 +48,12 @@ public class ConfigHandler {
         init(new File(ModCore.config.getPath(), ModCore.MODID + ".cfg"));
     }
 
-    public static void SetPlayAllSoundsOnPlayer(Boolean playOnPlayer){
+    public static void setPlayAllSoundsOnPlayer(Boolean playOnPlayer){
         ConfigHandler.playAllSoundsOnPlayer = playOnPlayer;
         config.get(category, "playAllSoundsOnPlayer", false).set(playOnPlayer);
         config.save();
     }
+
     public static void setLogMissingLines(Boolean logMissingLines){
         ConfigHandler.logMissingLines = logMissingLines;
         config.get(category, "logMissingLines", false).set(logMissingLines);
@@ -85,6 +88,12 @@ public class ConfigHandler {
     public static void setMaxCoolDownLines(int value){
         ConfigHandler.maxCoolDownLines = value;
         config.get(category, "maxCoolDownLines", 2).set(value);
+        config.save();
+    }
+
+    public static void setDownloadedAudios(Boolean downloadedAudios){
+        ConfigHandler.downloadedAudios = downloadedAudios;
+        config.get(category, "downloadedAudios", false).set(downloadedAudios);
         config.save();
     }
 

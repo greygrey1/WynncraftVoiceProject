@@ -30,7 +30,7 @@ public class SendChatEvent {
                 //                        "§4To set api key: §6/apikey <key>
                 break;
             case "/toggle speedrun":
-                ConfigHandler.SetPlayAllSoundsOnPlayer(!ConfigHandler.playAllSoundsOnPlayer);
+                ConfigHandler.setPlayAllSoundsOnPlayer(!ConfigHandler.playAllSoundsOnPlayer);
                 sendClientChatMessage("§bSet speedrun mode to §e" + ConfigHandler.playAllSoundsOnPlayer + "§b. This mode makes all sounds follow the player around");
                 event.setCanceled(true);
                 break;
