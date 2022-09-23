@@ -14,7 +14,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 @Mod.EventBusSubscriber
-public class JoinServerEvent {
+public class JoinServerEvent 
+    {
 
 
     private static final DecimalFormat df = new DecimalFormat("0.00");
@@ -24,11 +25,9 @@ public class JoinServerEvent {
         //Inject filter of packets
         event.getManager().channel().pipeline().addBefore("fml:packet_handler", ModCore.MODID + ":packet_filter", new PacketIncomingFilter());
         String serverIP = Objects.requireNonNull(Minecraft.getMinecraft().getCurrentServerData()).serverIP.toLowerCase();
-        if (serverIP.startsWith("play.wynncraft")
-                || serverIP.startsWith("media.wynncraft")
-                //     || serverIP.startsWith("beta.wynncraft")
-                || serverIP.startsWith("lobby.wynncraft")) {
-            System.out.println("Joined Live Wynncraft server");
+        if (serverIP.contains("wynncraft") 
+        {
+            System.out.println("Joined Live Wynncraft server"); // Don't keep print statements in code when distributing pls ;-;
             ModCore.inLiveWynnServer = true;
         }
         ModCore.inServer = true;
